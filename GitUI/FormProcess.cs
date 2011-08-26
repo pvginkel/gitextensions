@@ -7,6 +7,14 @@ using GitCommands;
 namespace GitUI
 {
     delegate void DataCallback(string text);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="isError">if command finished with error</param>
+    /// <param name="form">this form</param>
+    /// <returns>if handled</returns>
+    public delegate bool HandleOnExit(ref bool isError, FormProcess form);
+
     public class FormProcess : FormStatus
     {
         public string Remote { get; set; }
@@ -15,6 +23,7 @@ namespace GitUI
         public string ProcessArguments { get; set; }
         public string ProcessInput { get; set; }
         public Process Process { get; set; }
+        public HandleOnExit HandleOnExitCallback { get; set; }
 
         private bool restart;
         private GitCommandsInstance gitCommand;
@@ -103,19 +112,21 @@ namespace GitUI
         {
             if (restart)
             {
-                Reset();
-                ProcessCallback(this);
+                Retry();
                 return;
             }
 
             bool isError;
+
             try
             {
+                isError = gitCommand != null && gitCommand.ExitCode != 0;
+                if (HandleOnExitCallback != null)
+                    if(HandleOnExitCallback(ref isError, this))
+                        return;
                 // An error occurred!
-                if (gitCommand != null && gitCommand.ExitCode != 0)
+                if (isError)
                 {
-                    isError = true;
-
                     // TODO: This Plink stuff here seems misplaced. Is there a better
                     // home for all of this stuff? For example, if I had a label called pull, 
                     // we could end up in this code incorrectly.
@@ -134,8 +145,7 @@ namespace GitUI
                                 puttyError.ShowDialog();
                                 if (puttyError.RetryProcess)
                                 {
-                                    Reset();
-                                    ProcessCallback(this);
+                                    Retry();
                                     return;
                                 }
                             }
@@ -147,8 +157,7 @@ namespace GitUI
                                         "cmd.exe",
                                         string.Format("/k \"\"{0}\" -T \"{1}\"\"", Settings.Plink, UrlTryingToConnect));
 
-                                    Reset();
-                                    ProcessCallback(this);
+                                    Retry();
                                     return;
                                 }
 
@@ -156,10 +165,6 @@ namespace GitUI
                         }
 
                     }
-                }
-                else
-                {
-                    isError = false;
                 }
             }
             catch

@@ -64,10 +64,12 @@ namespace GitUI
             AutoStash.Checked = Settings.AutoStash;
         }
 
-        public void PullAndShowDialogWhenFailed()
+        public DialogResult PullAndShowDialogWhenFailed()
         {
-            if (!PullChanges())
-                ShowDialog();
+            if (PullChanges())
+                return DialogResult.OK;
+            else
+                return ShowDialog();
         }
 
         private void BrowseSourceClick(object sender, EventArgs e)
@@ -139,7 +141,10 @@ namespace GitUI
         private void PullClick(object sender, EventArgs e)
         {
             if (PullChanges())
+            {
+                DialogResult = DialogResult.OK;
                 Close();
+            }
         }
 
         public bool PullChanges()
