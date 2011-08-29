@@ -199,7 +199,7 @@ namespace GitUI
             FormProcess process = null;
             if (Fetch.Checked)
             {
-                process = new FormProcess(GitCommandHelpers.FetchCmd(source, Branches.Text, null));
+                process = new FormRemoteProcess(GitCommandHelpers.FetchCmd(source, Branches.Text, null));
             }
             else
             {
@@ -208,9 +208,9 @@ namespace GitUI
                     localBranch = null;
 
                 if (Merge.Checked)
-                    process = new FormProcess(GitCommandHelpers.PullCmd(source, Branches.Text, localBranch, false));
+                    process = new FormRemoteProcess(GitCommandHelpers.PullCmd(source, Branches.Text, localBranch, false));
                 else if (Rebase.Checked)
-                    process = new FormProcess(GitCommandHelpers.PullCmd(source, Branches.Text, localBranch, true));
+                    process = new FormRemoteProcess(GitCommandHelpers.PullCmd(source, Branches.Text, localBranch, true));
             }
 
             if (process != null)
