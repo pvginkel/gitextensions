@@ -1155,7 +1155,7 @@ namespace GitUI
 
         private void CompressGitDatabaseToolStripMenuItemClick(object sender, EventArgs e)
         {
-            new FormProcess("gc").ShowDialog();
+            new FormProcess("gc", "gc").ShowDialog();
         }
 
         private void VerifyGitDatabaseToolStripMenuItemClick(object sender, EventArgs e)
@@ -1363,7 +1363,7 @@ namespace GitUI
 
         private void InitializeAllSubmodulesToolStripMenuItemClick(object sender, EventArgs e)
         {
-            var process = new FormProcess(GitCommandHelpers.SubmoduleInitCmd(""));
+            var process = new FormProcess(GitCommandHelpers.SubmoduleInitCmd(""), "SubmoduleInit");
             process.ShowDialog();
             Initialize();
         }
@@ -1371,7 +1371,7 @@ namespace GitUI
         private void InitializeAllSubmodulesRecursiveToolStripMenuItemClick(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            var process = new FormProcess(GitCommandHelpers.SubmoduleInitCmd(""));
+            var process = new FormProcess(GitCommandHelpers.SubmoduleInitCmd(""), "SubmoduleInit");
             process.ShowDialog();
             InitSubmodulesRecursive();
             Initialize();
@@ -1391,7 +1391,7 @@ namespace GitUI
 
                 if (Settings.WorkingDir != oldworkingdir && File.Exists(Settings.WorkingDir + ".gitmodules"))
                 {
-                    var process = new FormProcess(GitCommandHelpers.SubmoduleInitCmd(""));
+                    var process = new FormProcess(GitCommandHelpers.SubmoduleInitCmd(""), "SubmoduleInit");
                     process.ShowDialog();
 
                     InitSubmodulesRecursive();
@@ -1405,7 +1405,7 @@ namespace GitUI
 
         private void SyncronizeAllSubmodulesToolStripMenuItemClick(object sender, EventArgs e)
         {
-            var process = new FormProcess(GitCommandHelpers.SubmoduleSyncCmd(""));
+            var process = new FormProcess(GitCommandHelpers.SubmoduleSyncCmd(""), "SubmoduleSync");
             process.ShowDialog();
             Initialize();
         }
@@ -1413,7 +1413,7 @@ namespace GitUI
         private void SynchronizeAllSubmodulesRecursiveToolStripMenuItemClick(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            var process = new FormProcess(GitCommandHelpers.SubmoduleSyncCmd(""));
+            var process = new FormProcess(GitCommandHelpers.SubmoduleSyncCmd(""), "SubmoduleSync");
             process.ShowDialog();
             SyncSubmodulesRecursive();
             Initialize();
@@ -1433,7 +1433,7 @@ namespace GitUI
 
                 if (Settings.WorkingDir != oldworkingdir && File.Exists(Settings.WorkingDir + ".gitmodules"))
                 {
-                    var process = new FormProcess(GitCommandHelpers.SubmoduleSyncCmd(""));
+                    var process = new FormProcess(GitCommandHelpers.SubmoduleSyncCmd(""), "SubmoduleSync");
                     process.ShowDialog();
 
                     SyncSubmodulesRecursive();
@@ -1454,13 +1454,13 @@ namespace GitUI
 
         private void StashChangesToolStripMenuItemClick(object sender, EventArgs e)
         {
-            new FormProcess("stash save").ShowDialog();
+            new FormProcess("stash save", "StashSave").ShowDialog();
             Initialize();
         }
 
         private void StashPopToolStripMenuItemClick(object sender, EventArgs e)
         {
-            new FormProcess("stash pop").ShowDialog();
+            new FormProcess("stash pop", "StashApply").ShowDialog();
             Initialize();
         }
 
@@ -1910,7 +1910,7 @@ namespace GitUI
             var toolStripItem = (ToolStripItem)sender;
 
             var command = string.Format("checkout \"{0}\"", toolStripItem.Text);
-            var form = new FormProcess(command);
+            var form = new FormProcess(command, "BranchSelect");
             form.ShowDialog(this);
             Initialize();
         }
@@ -2009,7 +2009,7 @@ namespace GitUI
 
         private void QuickFetch()
         {
-            new FormProcess(GitCommandHelpers.FetchCmd(string.Empty, string.Empty, string.Empty)).ShowDialog();
+            new FormProcess(GitCommandHelpers.FetchCmd(string.Empty, string.Empty, string.Empty), "QuickFetch").ShowDialog();
             Initialize();
         }
 

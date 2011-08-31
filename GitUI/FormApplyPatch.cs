@@ -115,20 +115,20 @@ namespace GitUI
             if (PatchFileMode.Checked)
                 if (IgnoreWhitespace.Checked)
                 {
-                    new FormProcess(GitCommandHelpers.PatchCmdIgnoreWhitespace(PatchFile.Text)).ShowDialog();
+                    new FormProcess(GitCommandHelpers.PatchCmdIgnoreWhitespace(PatchFile.Text), PerFormSettingsName()).ShowDialog();
                 }
                 else
                 {
-                    new FormProcess(GitCommandHelpers.PatchCmd(PatchFile.Text)).ShowDialog();
+                    new FormProcess(GitCommandHelpers.PatchCmd(PatchFile.Text), PerFormSettingsName()).ShowDialog();
                 }
             else
                 if (IgnoreWhitespace.Checked)
                 {
-                    new FormProcess(GitCommandHelpers.PatchDirCmdIgnoreWhitespace(PatchDir.Text)).ShowDialog();
+                    new FormProcess(GitCommandHelpers.PatchDirCmdIgnoreWhitespace(PatchDir.Text), PerFormSettingsName()).ShowDialog();
                 }
                 else
                 {
-                    new FormProcess(GitCommandHelpers.PatchDirCmd(PatchDir.Text)).ShowDialog();
+                    new FormProcess(GitCommandHelpers.PatchDirCmd(PatchDir.Text), PerFormSettingsName()).ShowDialog();
                 }
 
             EnableButtons();
@@ -147,7 +147,7 @@ namespace GitUI
         private void Skip_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            new FormProcess(GitCommandHelpers.SkipCmd()).ShowDialog();
+            new FormProcess(GitCommandHelpers.SkipCmd(), PerFormSettingsName()+"Skip").ShowDialog();
             EnableButtons();
             Cursor.Current = Cursors.Default;
         }
@@ -155,7 +155,7 @@ namespace GitUI
         private void button1_Click_1(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            new FormProcess(GitCommandHelpers.ResolvedCmd()).ShowDialog();
+            new FormProcess(GitCommandHelpers.ResolvedCmd(), PerFormSettingsName()+"Resolved").ShowDialog();
             EnableButtons();
             Cursor.Current = Cursors.Default;
         }
@@ -163,7 +163,7 @@ namespace GitUI
         private void Abort_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            new FormProcess(GitCommandHelpers.AbortCmd()).ShowDialog();
+            new FormProcess(GitCommandHelpers.AbortCmd(), PerFormSettingsName() + "Abort").ShowDialog();
             EnableButtons();
             Cursor.Current = Cursors.Default;
         }
