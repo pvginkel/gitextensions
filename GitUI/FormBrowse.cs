@@ -675,8 +675,13 @@ namespace GitUI
             if (item == null)
                 return;
 
+            IList<GitRevision> revisions = RevisionGrid.GetRevisions();
+
+            if (revisions.Count == 0)
+                return;
+
             if (item.ItemType == "blob" || item.ItemType == "tree")
-                GitUICommands.Instance.StartFileHistoryDialog(item.FileName);
+                GitUICommands.Instance.StartFileHistoryDialog(item.FileName, revisions[0]);
         }
 
         public void FindFileOnClick(object sender, EventArgs e)
@@ -1523,11 +1528,16 @@ namespace GitUI
                 return;
 
             string output;
-            if (revisions.Count == 1)   // single item selected
-                output = GitCommandHelpers.OpenWithDifftool(selectedItem, revisions[0].Guid,
-                                                                  revisions[0].ParentGuids[0]);
-            else                        // multiple items selected
-                output = GitCommandHelpers.OpenWithDifftool(selectedItem, revisions[0].Guid,
+            if (sender == diffBaseLocalToolStripMenuItem)
+                output = GitCommandHelpers.OpenWithDifftool(selectedItem, revisions[0].ParentGuids[0]);
+            else if(sender == difftoolRemoteLocalToolStripMenuItem)
+                output = GitCommandHelpers.OpenWithDifftool(selectedItem, revisions[0].Guid);
+            else           
+                if (revisions.Count == 1)   // single item selected
+                    output = GitCommandHelpers.OpenWithDifftool(selectedItem, revisions[0].Guid,
+                                                                      revisions[0].ParentGuids[0]);
+                else                        // multiple items selected
+                    output = GitCommandHelpers.OpenWithDifftool(selectedItem, revisions[0].Guid,
                                                                   revisions[revisions.Count - 1].Guid);
 
             if (!string.IsNullOrEmpty(output))
@@ -1762,8 +1772,13 @@ namespace GitUI
         {
             GitItemStatus item = DiffFiles.SelectedItem;
 
+            IList<GitRevision> revisions = RevisionGrid.GetRevisions();
+
+            if (revisions.Count == 0)
+                return;
+
             if (item.IsTracked)
-                GitUICommands.Instance.StartFileHistoryDialog(item.Name);
+                GitUICommands.Instance.StartFileHistoryDialog(item.Name, revisions[0]);
         }
 
         private void CurrentBranchDropDownOpening(object sender, EventArgs e)

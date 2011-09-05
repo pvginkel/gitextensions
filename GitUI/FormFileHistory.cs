@@ -49,6 +49,9 @@ namespace GitUI
                 SetBlameFilter(revision.Guid, false);
                 tabControl1.SelectedTab = Blame;
             }
+            else if (revision != null && revision.Guid != null)
+                filterBranchHelper.SetBranchFilter(revision.Guid, false);
+
         }
 
         public void SetBlameFilter(string guid, bool refresh) 

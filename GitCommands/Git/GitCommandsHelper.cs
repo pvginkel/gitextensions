@@ -2504,23 +2504,24 @@ namespace GitCommands
 
         public static string OpenWithDifftool(string filename)
         {
-            var output = "";
-            if (VersionInUse.GuiDiffToolExist)
-                RunCmdAsync(Settings.GitCommand, "difftool --gui --no-prompt \"" + filename + "\"");
-            else
-                output = RunCmd(Settings.GitCommand, "difftool --no-prompt \"" + filename + "\"");
-            return output;
+            return OpenWithDifftool(filename, null, null);
+        }
+
+        public static string OpenWithDifftool(string filename, string revision1)
+        {
+            return OpenWithDifftool(filename, revision1, null);
         }
 
         public static string OpenWithDifftool(string filename, string revision1, string revision2)
         {
             var output = "";
+            string args = revision2.Join(" ", revision1).Join(" ", "-- \"" + filename + "\"");
             if (VersionInUse.GuiDiffToolExist)
                 RunCmdAsync(Settings.GitCommand,
-                            "difftool --gui --no-prompt " + revision2 + " " + revision1 + " -- \"" + filename + "\"");
+                            "difftool --gui --no-prompt " + args);
             else
                 output = RunCmd(Settings.GitCommand,
-                                "difftool --no-prompt " + revision2 + " " + revision1 + " -- \"" + filename + "\"");
+                                "difftool --no-prompt " + args);
             return output;
         }
 
@@ -2634,5 +2635,23 @@ namespace GitCommands
             int years = Convert.ToInt32(Math.Floor((double)ts.Days / 365));
             return years <= 1 ? "1 year ago" : years + " years ago";
         }
+
+        public static bool IsNullOrEmpty(this string s)
+        {
+            return string.IsNullOrEmpty(s);
+        }
+
+
+        public static string Join(this string left, string sep, string right)
+        {
+            if (left.IsNullOrEmpty())
+                return right;
+            else if (right.IsNullOrEmpty())
+                return left;
+            else
+                return left + sep + right;
+
+        }
+
     }
 }

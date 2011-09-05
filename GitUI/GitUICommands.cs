@@ -723,7 +723,7 @@ namespace GitUI
             if (!InvokeEvent(PreFileHistory))
                 return false;
 
-            var form = new FormFileHistory(fileName, revision);
+            var form = new FormFileHistory(fileName, revision, false);
             form.ShowDialog();
 
             InvokeEvent(PostFileHistory);

@@ -189,6 +189,8 @@ namespace GitUI
             this.gitItemBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.gitRevisionBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.blameToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.diffBaseLocalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.difftoolRemoteLocalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolPanel.Panel1.SuspendLayout();
             this.toolPanel.Panel2.SuspendLayout();
             this.toolPanel.SuspendLayout();
@@ -755,9 +757,11 @@ namespace GitUI
             this.copyFilenameToClipboardToolStripMenuItem1,
             this.saveAsToolStripMenuItem1,
             this.fileHistoryDiffToolstripMenuItem,
-            this.blameToolStripMenuItem1});
+            this.blameToolStripMenuItem1,
+            this.diffBaseLocalToolStripMenuItem,
+            this.difftoolRemoteLocalToolStripMenuItem});
             this.DiffContextMenu.Name = "DiffContextMenu";
-            this.DiffContextMenu.Size = new System.Drawing.Size(252, 136);
+            this.DiffContextMenu.Size = new System.Drawing.Size(252, 180);
             // 
             // openWithDifftoolToolStripMenuItem
             // 
@@ -1576,6 +1580,20 @@ namespace GitUI
             this.blameToolStripMenuItem1.Text = "Blame";
             this.blameToolStripMenuItem1.Click += new System.EventHandler(this.blameToolStripMenuItem1_Click);
             // 
+            // diffBaseLocalToolStripMenuItem
+            // 
+            this.diffBaseLocalToolStripMenuItem.Name = "diffBaseLocalToolStripMenuItem";
+            this.diffBaseLocalToolStripMenuItem.Size = new System.Drawing.Size(251, 22);
+            this.diffBaseLocalToolStripMenuItem.Text = "Difftool base < - > local";
+            this.diffBaseLocalToolStripMenuItem.Click += new System.EventHandler(this.openWithDifftoolToolStripMenuItem_Click);
+            // 
+            // difftoolRemoteLocalToolStripMenuItem
+            // 
+            this.difftoolRemoteLocalToolStripMenuItem.Name = "difftoolRemoteLocalToolStripMenuItem";
+            this.difftoolRemoteLocalToolStripMenuItem.Size = new System.Drawing.Size(251, 22);
+            this.difftoolRemoteLocalToolStripMenuItem.Text = "Difftool remote < - > local ";
+            this.difftoolRemoteLocalToolStripMenuItem.Click += new System.EventHandler(this.openWithDifftoolToolStripMenuItem_Click);
+            // 
             // FormBrowse
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1776,5 +1794,7 @@ namespace GitUI
         private MenuStrip menuStrip1;
         private ToolStripMenuItem blameToolStripMenuItem;
         private ToolStripMenuItem blameToolStripMenuItem1;
+        private ToolStripMenuItem diffBaseLocalToolStripMenuItem;
+        private ToolStripMenuItem difftoolRemoteLocalToolStripMenuItem;
     }
 }
