@@ -37,6 +37,7 @@ namespace GitUI
         private ThumbnailToolBarButton _pullButton;
         private bool _toolbarButtonsCreated;
         private bool _dontUpdateOnIndexChange;
+        private FilterRevisionsHelper filterRevisionsHelper;
 
         public FormBrowse(string filter)
         {
@@ -57,7 +58,8 @@ namespace GitUI
 
             RevisionGrid.SelectionChanged += RevisionGridSelectionChanged;
             DiffText.ExtraDiffArgumentsChanged += DiffTextExtraDiffArgumentsChanged;
-            SetFilter(filter);
+            filterRevisionsHelper = new FilterRevisionsHelper(toolStripTextBoxFilter, toolStripDropDownButton1, RevisionGrid, toolStripLabel2);
+            filterRevisionsHelper.SetFilter(filter);
             DiffText.SetFileLoader(getNextPatchFile);
 
             GitTree.ImageList = new ImageList();
@@ -220,7 +222,7 @@ namespace GitUI
             _repositoryHostsToolStripMenuItem.Visible = RepoHosts.GitHosters.Count > 0;
             if (RepoHosts.GitHosters.Count == 1)
                 _repositoryHostsToolStripMenuItem.Text = RepoHosts.GitHosters[0].Description;
-            InitToolStripBranchFilter(localToolStripMenuItem.Checked, remoteToolStripMenuItem.Checked);
+            new FilterBranchHelper(toolStripBranches, toolStripDropDownButton2, RevisionGrid);
             if (hard)
                 ShowRevisions();
             _NO_TRANSLATE_Workingdir.Text = Settings.WorkingDir;
@@ -540,34 +542,7 @@ namespace GitUI
             }
         }
 
-        private void InitToolStripBranchFilter(bool local, bool remote)
-        {
-            toolStripBranches.Items.Clear();
-            IEnumerable<string> branches = GetBranchHeads(local, remote);
-            foreach (var branch in branches)
-                toolStripBranches.Items.Add(branch);
-        }
 
-        private static IEnumerable<string> GetBranchHeads(bool local, bool remote)
-        {
-            var list = new List<string>();
-            if (local && remote)
-            {
-                var branches = GitCommandHelpers.GetHeads(true, true);
-                list.AddRange(branches.Where(branch => !branch.IsTag).Select(branch => branch.Name));
-            }
-            else if (local)
-            {
-                var branches = GitCommandHelpers.GetHeads(false);
-                list.AddRange(branches.Select(branch => branch.Name));
-            }
-            else if (remote)
-            {
-                var branches = GitCommandHelpers.GetHeads(true, true);
-                list.AddRange(branches.Where(branch => branch.IsRemote && !branch.IsTag).Select(branch => branch.Name));
-            }
-            return list;
-        }
 
         private void RebaseClick(object sender, EventArgs e)
         {
@@ -800,6 +775,7 @@ namespace GitUI
             openWithToolStripMenuItem.Enabled = enableItems;
             copyFilenameToClipboardToolStripMenuItem.Enabled = enableItems;
             fileHistoryToolStripMenuItem.Enabled = enableItems;
+            blameToolStripMenuItem.Enabled = enableItems;
             editCheckedOutFileToolStripMenuItem.Enabled = enableItems;
         }
 
@@ -1186,77 +1162,6 @@ namespace GitUI
             GitCommandHelpers.StartExternalCommand(Settings.Puttygen, "");
         }
 
-        private void SetFilter(string filter)
-        {
-            if (string.IsNullOrEmpty(filter)) return;
-            toolStripTextBoxFilter.Text = filter;
-            ApplyFilter();
-        }
-
-        private void ApplyFilter()
-        {
-            string revListArgs;
-            string inMemMessageFilter;
-            string inMemCommitterFilter;
-            string inMemAuthorFilter;
-            var filterParams = new bool[4];
-            filterParams[0] = commitToolStripMenuItem1.Checked;
-            filterParams[1] = committerToolStripMenuItem.Checked;
-            filterParams[2] = authorToolStripMenuItem.Checked;
-            filterParams[3] = diffContainsToolStripMenuItem.Checked;
-            try
-            {
-                RevisionGrid.FormatQuickFilter(toolStripTextBoxFilter.Text,
-                                               filterParams,
-                                               out revListArgs,
-                                               out inMemMessageFilter,
-                                               out inMemCommitterFilter,
-                                               out inMemAuthorFilter);
-            }
-            catch (InvalidOperationException ex)
-            {
-                MessageBox.Show(ex.Message, "Filter error");
-                toolStripTextBoxFilter.Text = "";
-                return;
-            }
-
-            if ((RevisionGrid.Filter == revListArgs) &&
-                (RevisionGrid.InMemMessageFilter == inMemMessageFilter) &&
-                (RevisionGrid.InMemCommitterFilter == inMemCommitterFilter) &&
-                (RevisionGrid.InMemAuthorFilter == inMemAuthorFilter) &&
-                (RevisionGrid.InMemFilterIgnoreCase))
-                return;
-            RevisionGrid.Filter = revListArgs;
-            RevisionGrid.InMemMessageFilter = inMemMessageFilter;
-            RevisionGrid.InMemCommitterFilter = inMemCommitterFilter;
-            RevisionGrid.InMemAuthorFilter = inMemAuthorFilter;
-            RevisionGrid.InMemFilterIgnoreCase = true;
-            RevisionGrid.ForceRefreshRevisions();
-        }
-
-        private void ApplyBranchFilter()
-        {
-            bool success = RevisionGrid.SetAndApplyBranchFilter(toolStripBranches.Text);
-            if (success) RevisionGrid.ForceRefreshRevisions();
-        }
-
-        private void UpdateBranchFilterItems()
-        {
-            string filter = toolStripBranches.Text;
-            toolStripBranches.Items.Clear();
-            var index = toolStripBranches.Text.Length;
-            var branches = GetBranchHeads(localToolStripMenuItem.Checked, remoteToolStripMenuItem.Checked);
-            foreach (var branch in branches)
-                if (branch.Contains(filter))
-                    toolStripBranches.Items.Add(branch);
-            toolStripBranches.SelectionStart = index;
-        }
-
-        private void ToolStripTextBoxFilterLeave(object sender, EventArgs e)
-        {
-            ToolStripLabel2Click(sender, e);
-        }
-
         private void TabControl1SelectedIndexChanged(object sender, EventArgs e)
         {
             FillFileTree();
@@ -1332,12 +1237,6 @@ namespace GitUI
         private void ToolStripButtonPushClick(object sender, EventArgs e)
         {
             PushToolStripMenuItemClick(sender, e);
-        }
-
-        private void ToolStripTextBoxFilterKeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Enter)
-                ToolStripLabel2Click(null, null);
         }
 
         private void ManageSubmodulesToolStripMenuItemClick(object sender, EventArgs e)
@@ -1734,11 +1633,6 @@ namespace GitUI
             GitBashToolStripMenuItemClick1(sender, e);
         }
 
-        private void ToolStripLabel2Click(object sender, EventArgs e)
-        {
-            ApplyFilter();
-        }
-
         private void ToolStripButtonPullClick(object sender, EventArgs e)
         {
             PullToolStripMenuItemClick(sender, e);
@@ -1826,33 +1720,10 @@ namespace GitUI
             }
         }
 
-        private void toolStripBranches_TextUpdate(object sender, EventArgs e)
-        {
-            UpdateBranchFilterItems();
-        }
-
-        private void toolStripBranches_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyValue == (char)Keys.Enter)
-            {
-                ApplyBranchFilter();
-            }
-        }
-
-        private void toolStripBranches_DropDown(object sender, EventArgs e)
-        {
-            InitToolStripBranchFilter(localToolStripMenuItem.Checked, remoteToolStripMenuItem.Checked);
-            UpdateBranchFilterItems();
-        }
 
         private void toolStripStatusLabel1_Click(object sender, EventArgs e)
         {
             statusStrip.Hide();
-        }
-
-        private void toolStripBranches_Leave(object sender, EventArgs e)
-        {
-            ApplyBranchFilter();
         }
 
         private void openWithToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1913,18 +1784,6 @@ namespace GitUI
             var form = new FormProcess(command, "BranchSelect");
             form.ShowDialog(this);
             Initialize();
-        }
-
-        private void diffContainsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (diffContainsToolStripMenuItem.Checked)
-            {
-                commitToolStripMenuItem1.Checked = false;
-                committerToolStripMenuItem.Checked = false;
-                authorToolStripMenuItem.Checked = false;
-            }
-            else
-                commitToolStripMenuItem1.Checked = true;
         }
 
         private void _forkCloneMenuItem_Click(object sender, EventArgs e)
@@ -2185,5 +2044,38 @@ namespace GitUI
             }
         }
 
+        private void blameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+                      
+            var item = GitTree.SelectedNode.Tag as GitItem;
+
+            if (item == null)
+                return;
+
+            IList<GitRevision> revisions = RevisionGrid.GetRevisions();
+
+            if (revisions.Count == 0)
+                return;
+
+            if (item.ItemType == "blob" || item.ItemType == "tree")
+                GitUICommands.Instance.StartFileHistoryBlameDialog(item.FileName, revisions[0]);
+        }
+
+        private void blameToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            GitItemStatus item = DiffFiles.SelectedItem;
+
+            if (item == null)
+                return;
+
+            IList<GitRevision> revisions = RevisionGrid.GetRevisions();
+
+            if (revisions.Count == 0)
+                return;
+
+            if (item.IsTracked)
+                GitUICommands.Instance.StartFileHistoryBlameDialog(item.Name, revisions[0]);
+
+        }
     }
 }

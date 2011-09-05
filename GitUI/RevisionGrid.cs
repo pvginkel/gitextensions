@@ -89,6 +89,7 @@ namespace GitUI
             BranchFilter = String.Empty;
             SetShowBranches();
             Filter = "";
+            FixedFilter = "";
             InMemFilterIgnoreCase = false;
             InMemAuthorFilter = "";
             InMemCommitterFilter = "";
@@ -135,6 +136,7 @@ namespace GitUI
         public IComparable[] LastSelectedRows { get; private set; }
         public Font RefsFont { get; private set; }
         public string Filter { get; set; }
+        public string FixedFilter { get; set; }
         public bool InMemFilterIgnoreCase { get; set; }
         public string InMemAuthorFilter { get; set; }
         public string InMemCommitterFilter { get; set; }
@@ -458,6 +460,11 @@ namespace GitUI
             return true;
         }
 
+        public void SetLimit(int limit)         
+        {
+            _revisionFilter.SetLimit(limit);
+        }
+
         public override void Refresh()
         {
             SetRevisionsLayout();
@@ -692,7 +699,7 @@ namespace GitUI
                 if (Settings.ShowGitNotes && LogParam.Contains(" --not --glob=notes --not"))
                     LogParam = LogParam.Replace("  --not --glob=notes --not", string.Empty);
 
-                _revisionGraphCommand = new RevisionGraph { BranchFilter = BranchFilter, LogParam = LogParam + Filter + _revisionFilter.GetFilter() };
+                _revisionGraphCommand = new RevisionGraph { BranchFilter = BranchFilter, LogParam = LogParam + _revisionFilter.GetFilter() + Filter + FixedFilter };
                 _revisionGraphCommand.Updated += GitGetCommitsCommandUpdated;
                 _revisionGraphCommand.Exited += GitGetCommitsCommandExited;
                 _revisionGraphCommand.Error += _revisionGraphCommand_Error;
@@ -2100,6 +2107,283 @@ namespace GitUI
         }
 
         #endregion
+
+    }
+
+    public class FilterBranchHelper
+    {
+        private ToolStripComboBox toolStripBranches;
+        private ToolStripDropDownButton toolStripDropDownButton2;
+        private RevisionGrid RevisionGrid;
+        private ToolStripMenuItem localToolStripMenuItem;
+        private ToolStripMenuItem remoteToolStripMenuItem;
+
+
+        public FilterBranchHelper(ToolStripComboBox toolStripBranches, ToolStripDropDownButton toolStripDropDownButton2, RevisionGrid RevisionGrid)
+        {
+            this.toolStripBranches = toolStripBranches;
+            this.toolStripDropDownButton2 = toolStripDropDownButton2;
+            this.RevisionGrid = RevisionGrid;
+            this.localToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.remoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+
+
+            this.toolStripDropDownButton2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.localToolStripMenuItem,
+            this.remoteToolStripMenuItem});
+            // 
+            // localToolStripMenuItem
+            // 
+            this.localToolStripMenuItem.Checked = true;
+            this.localToolStripMenuItem.CheckOnClick = true;
+            this.localToolStripMenuItem.Name = "localToolStripMenuItem";
+            this.localToolStripMenuItem.Text = "Local";
+            // 
+            // remoteToolStripMenuItem
+            // 
+            this.remoteToolStripMenuItem.CheckOnClick = true;
+            this.remoteToolStripMenuItem.Name = "remoteToolStripMenuItem";
+            this.remoteToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.remoteToolStripMenuItem.Text = "Remote";
+
+            this.toolStripBranches.DropDown += new System.EventHandler(this.toolStripBranches_DropDown);
+            this.toolStripBranches.TextUpdate += new System.EventHandler(this.toolStripBranches_TextUpdate);
+            this.toolStripBranches.Leave += new System.EventHandler(this.toolStripBranches_Leave);
+            this.toolStripBranches.KeyUp += new System.Windows.Forms.KeyEventHandler(this.toolStripBranches_KeyUp);
+
+
+            InitToolStripBranchFilter(localToolStripMenuItem.Checked, remoteToolStripMenuItem.Checked);
+        }
+
+        private void InitToolStripBranchFilter(bool local, bool remote)
+        {
+            toolStripBranches.Items.Clear();
+            IEnumerable<string> branches = GetBranchHeads(local, remote);
+            foreach (var branch in branches)
+                toolStripBranches.Items.Add(branch);
+        }
+
+        private static IEnumerable<string> GetBranchHeads(bool local, bool remote)
+        {
+            var list = new List<string>();
+            if (local && remote)
+            {
+                var branches = GitCommandHelpers.GetHeads(true, true);
+                list.AddRange(branches.Where(branch => !branch.IsTag).Select(branch => branch.Name));
+            }
+            else if (local)
+            {
+                var branches = GitCommandHelpers.GetHeads(false);
+                list.AddRange(branches.Select(branch => branch.Name));
+            }
+            else if (remote)
+            {
+                var branches = GitCommandHelpers.GetHeads(true, true);
+                list.AddRange(branches.Where(branch => branch.IsRemote && !branch.IsTag).Select(branch => branch.Name));
+            }
+            return list;
+        }
+
+        private void toolStripBranches_TextUpdate(object sender, EventArgs e)
+        {
+            UpdateBranchFilterItems();
+        }
+
+        private void toolStripBranches_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyValue == (char)Keys.Enter)
+            {
+                ApplyBranchFilter(true);
+            }
+        }
+
+        private void toolStripBranches_DropDown(object sender, EventArgs e)
+        {
+            InitToolStripBranchFilter(localToolStripMenuItem.Checked, remoteToolStripMenuItem.Checked);
+            UpdateBranchFilterItems();
+        }
+
+        private void ApplyBranchFilter(bool refresh)
+        {
+            bool success = RevisionGrid.SetAndApplyBranchFilter(toolStripBranches.Text);
+            if (success && refresh)
+                RevisionGrid.ForceRefreshRevisions();
+        }
+
+        public void SetBranchFilter(string filter, bool refresh)
+        {
+            toolStripBranches.Text = filter;
+            ApplyBranchFilter(refresh);
+        }
+
+        private void UpdateBranchFilterItems()
+        {
+            string filter = toolStripBranches.Text;
+            toolStripBranches.Items.Clear();
+            var index = toolStripBranches.Text.Length;
+            var branches = GetBranchHeads(localToolStripMenuItem.Checked, remoteToolStripMenuItem.Checked);
+            foreach (var branch in branches)
+                if (branch.Contains(filter))
+                    toolStripBranches.Items.Add(branch);
+            toolStripBranches.SelectionStart = index;
+        }
+
+        private void toolStripBranches_Leave(object sender, EventArgs e)
+        {
+            ApplyBranchFilter(true);
+        }       
+    }
+
+
+    public class FilterRevisionsHelper
+    {
+
+        private ToolStripTextBox toolStripTextBoxFilter;
+        private ToolStripDropDownButton toolStripDropDownButton1;
+        private RevisionGrid RevisionGrid;
+        private ToolStripLabel toolStripLabel2;
+
+        private ToolStripMenuItem commitToolStripMenuItem1;
+        private ToolStripMenuItem committerToolStripMenuItem;
+        private ToolStripMenuItem authorToolStripMenuItem;
+        private ToolStripMenuItem diffContainsToolStripMenuItem;
+
+
+
+        public FilterRevisionsHelper(ToolStripTextBox toolStripTextBoxFilter, ToolStripDropDownButton toolStripDropDownButton1, RevisionGrid RevisionGrid, ToolStripLabel toolStripLabel2)
+        {
+            this.toolStripDropDownButton1 = toolStripDropDownButton1;
+            this.toolStripTextBoxFilter = toolStripTextBoxFilter;
+            this.RevisionGrid = RevisionGrid;
+            this.toolStripLabel2 = toolStripLabel2;
+
+            this.commitToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.committerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.authorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.diffContainsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+                this.commitToolStripMenuItem1,
+                this.committerToolStripMenuItem,
+                this.authorToolStripMenuItem,
+                this.diffContainsToolStripMenuItem});
+
+            // 
+            // commitToolStripMenuItem1
+            // 
+            this.commitToolStripMenuItem1.Checked = true;
+            this.commitToolStripMenuItem1.CheckOnClick = true;
+            this.commitToolStripMenuItem1.Name = "commitToolStripMenuItem1";
+            this.commitToolStripMenuItem1.Text = "Commit";
+            // 
+            // committerToolStripMenuItem
+            // 
+            this.committerToolStripMenuItem.CheckOnClick = true;
+            this.committerToolStripMenuItem.Name = "committerToolStripMenuItem";
+            this.committerToolStripMenuItem.Text = "Committer";
+            // 
+            // authorToolStripMenuItem
+            // 
+            this.authorToolStripMenuItem.CheckOnClick = true;
+            this.authorToolStripMenuItem.Name = "authorToolStripMenuItem";
+            this.authorToolStripMenuItem.Text = "Author";
+            // 
+            // diffContainsToolStripMenuItem
+            // 
+            this.diffContainsToolStripMenuItem.CheckOnClick = true;
+            this.diffContainsToolStripMenuItem.Name = "diffContainsToolStripMenuItem";
+            this.diffContainsToolStripMenuItem.Text = "Diff contains (SLOW)";
+            this.diffContainsToolStripMenuItem.Click += new System.EventHandler(this.diffContainsToolStripMenuItem_Click);
+
+
+            this.toolStripLabel2.Click += new System.EventHandler(this.ToolStripLabel2Click);
+            this.toolStripTextBoxFilter.Leave += new System.EventHandler(this.ToolStripTextBoxFilterLeave);
+            this.toolStripTextBoxFilter.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ToolStripTextBoxFilterKeyPress);
+
+        
+        }
+
+        public void SetFilter(string filter)
+        {
+            if (string.IsNullOrEmpty(filter)) return;
+            toolStripTextBoxFilter.Text = filter;
+            ApplyFilter();
+        }
+
+        private void ApplyFilter()
+        {
+            string revListArgs;
+            string inMemMessageFilter;
+            string inMemCommitterFilter;
+            string inMemAuthorFilter;
+            var filterParams = new bool[4];
+            filterParams[0] = commitToolStripMenuItem1.Checked;
+            filterParams[1] = committerToolStripMenuItem.Checked;
+            filterParams[2] = authorToolStripMenuItem.Checked;
+            filterParams[3] = diffContainsToolStripMenuItem.Checked;
+            try
+            {
+                RevisionGrid.FormatQuickFilter(toolStripTextBoxFilter.Text,
+                                               filterParams,
+                                               out revListArgs,
+                                               out inMemMessageFilter,
+                                               out inMemCommitterFilter,
+                                               out inMemAuthorFilter);
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Filter error");
+                toolStripTextBoxFilter.Text = "";
+                return;
+            }
+
+            if ((RevisionGrid.Filter == revListArgs) &&
+                (RevisionGrid.InMemMessageFilter == inMemMessageFilter) &&
+                (RevisionGrid.InMemCommitterFilter == inMemCommitterFilter) &&
+                (RevisionGrid.InMemAuthorFilter == inMemAuthorFilter) &&
+                (RevisionGrid.InMemFilterIgnoreCase))
+                return;
+            RevisionGrid.Filter = revListArgs;
+            RevisionGrid.InMemMessageFilter = inMemMessageFilter;
+            RevisionGrid.InMemCommitterFilter = inMemCommitterFilter;
+            RevisionGrid.InMemAuthorFilter = inMemAuthorFilter;
+            RevisionGrid.InMemFilterIgnoreCase = true;
+            RevisionGrid.ForceRefreshRevisions();
+        }
+
+
+        private void ToolStripTextBoxFilterLeave(object sender, EventArgs e)
+        {
+            ToolStripLabel2Click(sender, e);
+        }
+
+        private void ToolStripTextBoxFilterKeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+                ToolStripLabel2Click(null, null);
+        }
+
+        private void ToolStripLabel2Click(object sender, EventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        private void diffContainsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (diffContainsToolStripMenuItem.Checked)
+            {
+                commitToolStripMenuItem1.Checked = false;
+                committerToolStripMenuItem.Checked = false;
+                authorToolStripMenuItem.Checked = false;
+            }
+            else
+                commitToolStripMenuItem1.Checked = true;
+        }
+
+        public void SetLimit(int limit) {
+            RevisionGrid.SetLimit(limit);
+        }
+
 
     }
 }

@@ -731,6 +731,22 @@ namespace GitUI
             return false;
         }
 
+        public bool StartFileHistoryBlameDialog(string fileName, GitRevision revision)
+        {
+            if (!RequiresValidWorkingDir())
+                return false;
+
+            if (!InvokeEvent(PreFileHistory))
+                return false;
+
+            var form = new FormFileHistory(fileName, revision, true);            
+            form.ShowDialog();
+
+            InvokeEvent(PostFileHistory);
+
+            return false;
+        }
+        
         public bool StartPushDialog(bool pushOnShow)
         {
             if (!RequiresValidWorkingDir())

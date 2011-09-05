@@ -13,10 +13,16 @@ namespace GitUI
     public partial class FormFileHistory : GitExtensionsForm
     {
         SynchronizationContext syncContext = SynchronizationContext.Current;
+        private FilterRevisionsHelper filterRevisionsHelper;
+        private FilterBranchHelper filterBranchHelper;
 
         public FormFileHistory(string fileName, GitRevision revision)
         {
             InitializeComponent();
+            filterBranchHelper = new FilterBranchHelper(toolStripBranches, toolStripDropDownButton2, FileChanges);
+
+            filterRevisionsHelper = new FilterRevisionsHelper(toolStripTextBoxFilter, toolStripDropDownButton1, FileChanges, toolStripLabel2);            
+
             FileChanges.SetInitialRevision(revision);
             Translate();
 
@@ -33,6 +39,22 @@ namespace GitUI
         public FormFileHistory(string fileName)
             : this(fileName, null)
         {
+        }
+
+        public FormFileHistory(string fileName, GitRevision revision, bool blameFilter) 
+            : this(fileName, revision)
+        {
+            if (blameFilter)
+            {
+                SetBlameFilter(revision.Guid, false);
+                tabControl1.SelectedTab = Blame;
+            }
+        }
+
+        public void SetBlameFilter(string guid, bool refresh) 
+        {
+            filterRevisionsHelper.SetLimit(1);
+            filterBranchHelper.SetBranchFilter(guid, refresh);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -135,7 +157,7 @@ namespace GitUI
 
             syncContext.Post(o =>
             {
-                FileChanges.Filter = filter;
+                FileChanges.FixedFilter = filter;
                 FileChanges.AllowGraphWithFilter = true;
                 FileChanges.Load();
             }, this);
