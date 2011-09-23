@@ -1833,7 +1833,7 @@ namespace GitUI
 
             private bool MoveNext()
             {
-
+                
                 // If there are no lanes, there is nothing more to draw
                 if (laneNodes.Count == 0 || sourceGraph.Count <= laneRows.Count)
                 {

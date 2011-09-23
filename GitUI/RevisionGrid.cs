@@ -694,7 +694,7 @@ namespace GitUI
 
                 Revisions.ClearSelection();
                 CurrentCheckout = newCurrentCheckout;
-                Revisions.Clear();
+                //Revisions.Clear();
                 Error.Visible = false;
 
                 if (!Settings.ValidWorkingDir())
@@ -1784,6 +1784,14 @@ namespace GitUI
                     }
                 }
                 return;
+            }
+            
+            for (var i = 0; i < Revisions.RowCount; i++)
+            {
+                if (((GitRevision)Revisions.GetRowData(i)).Guid == rev.Guid)
+                {
+                    return;
+                }
             }
 
             var dataType = DvcsGraph.DataType.Normal;
