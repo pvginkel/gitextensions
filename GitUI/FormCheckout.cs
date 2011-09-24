@@ -26,7 +26,7 @@ namespace GitUI
                 if (Force.Checked)
                     command += " --force";
 
-                new FormProcess(command).ShowDialog();
+                new FormProcess(command, PerFormSettingsName()).ShowDialog();
 
                 Close();
             }

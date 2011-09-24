@@ -39,7 +39,8 @@ namespace GitUI
                 var fromProcess =
                     new FormRemoteProcess(Settings.GitCommand,
                                     GitCommandHelpers.CloneCmd(_NO_TRANSLATE_From.Text, dirTo,
-                                                                     CentralRepository.Checked, Branches.Text, null));
+                                                                     CentralRepository.Checked, Branches.Text, null),
+                                    PerFormSettingsName());
                 fromProcess.SetUrlTryingToConnect(_NO_TRANSLATE_From.Text);
                 fromProcess.ShowDialog();
 
@@ -82,7 +83,7 @@ namespace GitUI
 
         private static void InitSubmodules()
         {
-            var process = new FormProcess(GitCommandHelpers.SubmoduleInitCmd(""));
+            var process = new FormProcess(GitCommandHelpers.SubmoduleInitCmd(""), "SubmoduleInit");
             process.ShowDialog();
             InitializeSubmodulesRecursive();
         }
