@@ -313,7 +313,7 @@ namespace GitUI
                 PageantPath.Text = Settings.Pageant;
                 AutostartPageant.Checked = Settings.AutoStartPageant;
 
-                CloseProcessDialog.Checked = Settings.GlobalCloseProcessDialog;
+                CloseProcessDialog.SetNullableChecked(Settings.GlobalCloseProcessDialog);
                 ShowGitCommandLine.Checked = Settings.ShowGitCommandLine;
 
                 UseFastChecks.Checked = Settings.UseFastChecks;
@@ -404,7 +404,7 @@ namespace GitUI
             Settings.ShowAuthorGravatar = ShowAuthorGravatar.Checked;
             Settings.GravatarFallbackService = noImageService.Text;
 
-            Settings.GlobalCloseProcessDialog = CloseProcessDialog.Checked;
+            Settings.GlobalCloseProcessDialog = CloseProcessDialog.GetNullableChecked();
             Settings.ShowGitCommandLine = ShowGitCommandLine.Checked;
 
             Settings.UseFastChecks = UseFastChecks.Checked;
