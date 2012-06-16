@@ -321,6 +321,7 @@ namespace GitUI
             editgitignoreToolStripMenuItem1.Enabled = validWorkingDir;
             editgitattributesToolStripMenuItem.Enabled = validWorkingDir;
             editmailmapToolStripMenuItem.Enabled = validWorkingDir;
+            editgitreviewToolStripMenuItem.Enabled = validWorkingDir;
             toolStripSplitStash.Enabled = validWorkingDir;
             commitcountPerUserToolStripMenuItem.Enabled = validWorkingDir;
             _createPullRequestsToolStripMenuItem.Enabled = validWorkingDir;
@@ -1331,6 +1332,12 @@ namespace GitUI
         private void EditMailMapToolStripMenuItemClick(object sender, EventArgs e)
         {
             if (GitUICommands.Instance.StartMailMapDialog(this))
+                Initialize();
+        }
+
+        private void EditGitReviewToolStripMenuItemClick(object sender, EventArgs e)
+        {
+            if (GitUICommands.Instance.StartGitReviewDialog(this))
                 Initialize();
         }
 

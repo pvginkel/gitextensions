@@ -117,6 +117,9 @@ namespace GitUI
         public event GitUIEventHandler PreMailMap;
         public event GitUIEventHandler PostMailMap;
 
+        public event GitUIEventHandler PreEditGitReview;
+        public event GitUIEventHandler PostEditGitReview;
+
         public event GitUIEventHandler PreVerifyDatabase;
         public event GitUIEventHandler PostVerifyDatabase;
 
@@ -953,6 +956,22 @@ namespace GitUI
         public bool StartMailMapDialog()
         {
             return StartMailMapDialog(null);
+        }
+
+        public bool StartGitReviewDialog(IWin32Window owner)
+        {
+            if (!RequiresValidWorkingDir())
+                return false;
+
+            if (!InvokeEvent(owner, PreEditGitReview))
+                return true;
+
+            var form = new FormGitReview();
+            form.ShowDialog(owner);
+
+            InvokeEvent(owner, PostEditGitReview);
+
+            return true;
         }
 
         public bool StartVerifyDatabaseDialog(IWin32Window owner)
