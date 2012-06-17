@@ -150,6 +150,7 @@ namespace GitUI
             Settings.WorkingDirChanged += (a, b, c) => RefreshPullIcon();
             RefreshPullIcon();
             dontSetAsDefaultToolStripMenuItem.Checked = Settings.DonSetAsLastPullAction;
+            UpdateGerritSupport(false);
         }
 
         private void ShowDashboard()
@@ -340,6 +341,7 @@ namespace GitUI
 
             CheckForMergeConflicts();
             UpdateStashCount();
+            UpdateGerritSupport(validWorkingDir);
             // load custom user menu
             LoadUserMenu();
 
@@ -2425,6 +2427,37 @@ namespace GitUI
             if (GitUICommands.Instance.StartPullDialog(this, true, out pullCompelted, configProc))
                 Initialize();
 
+        }
+
+        private void UpdateGerritSupport(bool validWorkingDir)
+        {
+            bool showGerritItems = validWorkingDir && File.Exists(Settings.WorkingDir + ".gitreview");
+
+            toolStripSeparatorGerrit.Visible = showGerritItems;
+            toolStripButtonGerritDownload.Visible = showGerritItems;
+            toolStripButtonGerritPublish.Visible = showGerritItems;
+        }
+
+        private void ToolStripButtonGerritDownloadClick(object sender, EventArgs e)
+        {
+            GerritDownloadToolStripMenuItemClick(sender, e);
+        }
+
+        private void GerritDownloadToolStripMenuItemClick(object sender, EventArgs e)
+        {
+            if (GitUICommands.Instance.StartGerritDownloadDialog(this))
+                Initialize();
+        }
+
+        private void ToolStripButtonGerritPublishClick(object sender, EventArgs e)
+        {
+            GerritPublishToolStripMenuItemClick(sender, e);
+        }
+
+        private void GerritPublishToolStripMenuItemClick(object sender, EventArgs e)
+        {
+            if (GitUICommands.Instance.StartGerritPublishDialog(this))
+                Initialize();
         }
       
     }

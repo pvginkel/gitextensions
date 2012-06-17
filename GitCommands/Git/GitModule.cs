@@ -1169,6 +1169,21 @@ namespace GitCommands
             return "fetch " + progressOption + GetFetchArgs(remote, remoteBranch, localBranch);
         }
 
+        public string FetchManualCmd(string remote, string remoteBranch)
+        {
+            var progressOption = "";
+            if (GitCommandHelpers.VersionInUse.FetchCanAskForProgress)
+                progressOption = "--progress ";
+
+            remote = FixPath(remote);
+
+            //Remove spaces... 
+            if (remoteBranch != null)
+                remoteBranch = remoteBranch.Replace(" ", "");
+
+            return "fetch " + progressOption + "\"" + remote.Trim() + "\" " + remoteBranch;
+        }
+
         public string Pull(string remote, string remoteBranch, string localBranch, bool rebase)
         {
             remote = FixPath(remote);

@@ -147,6 +147,12 @@ namespace GitUI
         public event GitUIEventHandler PreEditGitAttributes;
         public event GitUIEventHandler PostEditGitAttributes;
 
+        public event GitUIEventHandler PreGerritDownload;
+        public event GitUIEventHandler PostGerritDownload;
+
+        public event GitUIEventHandler PreGerritPublish;
+        public event GitUIEventHandler PostGerritPublish;
+
         #endregion
 
         public string GitCommand(string arguments)
@@ -958,6 +964,11 @@ namespace GitUI
             return StartMailMapDialog(null);
         }
 
+        public bool StartGitReviewDialog()
+        {
+            return StartGitReviewDialog(null);
+        }
+
         public bool StartGitReviewDialog(IWin32Window owner)
         {
             if (!RequiresValidWorkingDir())
@@ -1405,6 +1416,48 @@ namespace GitUI
         {
             WrapRepoHostingCall("Create pull request", gitHoster,
                                 gh => (new CreatePullRequestForm(gitHoster, chooseRemote, chooseBranch)).ShowDialog(owner));
+        }
+
+        public bool StartGerritDownloadDialog()
+        {
+            return StartGerritDownloadDialog(null);
+        }
+
+        public bool StartGerritDownloadDialog(IWin32Window owner)
+        {
+            if (!RequiresValidWorkingDir())
+                return false;
+
+            if (!InvokeEvent(owner, PreGerritDownload))
+                return true;
+
+            var form = new FormGerritDownload();
+            form.ShowDialog(owner);
+
+            InvokeEvent(owner, PostGerritDownload);
+
+            return true;
+        }
+
+        public bool StartGerritPublishDialog()
+        {
+            return StartGerritPublishDialog(null);
+        }
+
+        public bool StartGerritPublishDialog(IWin32Window owner)
+        {
+            if (!RequiresValidWorkingDir())
+                return false;
+
+            if (!InvokeEvent(owner, PreGerritPublish))
+                return true;
+
+            var form = new FormGerritPublish();
+            form.ShowDialog(owner);
+
+            InvokeEvent(owner, PostGerritPublish);
+
+            return true;
         }
     }
 }

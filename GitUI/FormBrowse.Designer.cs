@@ -189,6 +189,7 @@ namespace GitUI
             this.editgitignoreToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.editgitattributesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editmailmapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editgitreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator13 = new System.Windows.Forms.ToolStripSeparator();
             this.settingsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -205,7 +206,9 @@ namespace GitUI
             this.menuStrip1 = new GitUI.MenuStripEx();
             this.gitItemBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.gitRevisionBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.editgitreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparatorGerrit = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButtonGerritDownload = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonGerritPublish = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.toolPanel)).BeginInit();
             this.toolPanel.Panel1.SuspendLayout();
             this.toolPanel.Panel2.SuspendLayout();
@@ -285,6 +288,9 @@ namespace GitUI
             this.toolStripButton1,
             this.toolStripButtonPull,
             this.toolStripButtonPush,
+            this.toolStripSeparatorGerrit,
+            this.toolStripButtonGerritDownload,
+            this.toolStripButtonGerritPublish,
             this.toolStripSeparator2,
             this.GitBash,
             this.EditSettings,
@@ -1604,6 +1610,13 @@ namespace GitUI
             this.editmailmapToolStripMenuItem.Text = "Edit .mailmap";
             this.editmailmapToolStripMenuItem.Click += new System.EventHandler(this.EditMailMapToolStripMenuItemClick);
             // 
+            // editgitreviewToolStripMenuItem
+            // 
+            this.editgitreviewToolStripMenuItem.Name = "editgitreviewToolStripMenuItem";
+            this.editgitreviewToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.editgitreviewToolStripMenuItem.Text = "Edit .gitreview";
+            this.editgitreviewToolStripMenuItem.Click += new System.EventHandler(this.EditGitReviewToolStripMenuItemClick);
+            // 
             // toolStripSeparator13
             // 
             this.toolStripSeparator13.Name = "toolStripSeparator13";
@@ -1719,12 +1732,30 @@ namespace GitUI
             this.menuStrip1.Size = new System.Drawing.Size(923, 24);
             this.menuStrip1.TabIndex = 3;
             // 
-            // editgitreviewToolStripMenuItem
+            // toolStripSeparatorGerrit
             // 
-            this.editgitreviewToolStripMenuItem.Name = "editgitreviewToolStripMenuItem";
-            this.editgitreviewToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
-            this.editgitreviewToolStripMenuItem.Text = "Edit .gitreview";
-            this.editgitreviewToolStripMenuItem.Click += new System.EventHandler(this.EditGitReviewToolStripMenuItemClick);
+            this.toolStripSeparatorGerrit.Name = "toolStripSeparatorGerrit";
+            this.toolStripSeparatorGerrit.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripButtonGerritDownload
+            // 
+            this.toolStripButtonGerritDownload.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonGerritDownload.Image = global::GitUI.Properties.Resources.GerritDownload;
+            this.toolStripButtonGerritDownload.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonGerritDownload.Name = "toolStripButtonGerritDownload";
+            this.toolStripButtonGerritDownload.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonGerritDownload.Text = "Download Gerrit change";
+            this.toolStripButtonGerritDownload.Click += new System.EventHandler(this.ToolStripButtonGerritDownloadClick);
+            // 
+            // toolStripButtonGerritPublish
+            // 
+            this.toolStripButtonGerritPublish.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonGerritPublish.Image = global::GitUI.Properties.Resources.GerritPublish;
+            this.toolStripButtonGerritPublish.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonGerritPublish.Name = "toolStripButtonGerritPublish";
+            this.toolStripButtonGerritPublish.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonGerritPublish.Text = "Publish Gerrit change";
+            this.toolStripButtonGerritPublish.Click += new System.EventHandler(this.ToolStripButtonGerritPublishClick);
             // 
             // FormBrowse
             // 
@@ -1948,6 +1979,9 @@ namespace GitUI
         private ToolStripSeparator toolStripSeparator14;
         private ToolStripMenuItem dontSetAsDefaultToolStripMenuItem;
         private ToolStripMenuItem fetchAllToolStripMenuItem;
-        private ToolStripMenuItem editgitreviewToolStripMenuItem;        
+        private ToolStripMenuItem editgitreviewToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparatorGerrit;
+        private ToolStripButton toolStripButtonGerritDownload;
+        private ToolStripButton toolStripButtonGerritPublish;        
     }
 }

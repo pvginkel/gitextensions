@@ -85,6 +85,12 @@ namespace GitUIPluginInterfaces
         event GitUIEventHandler PreUpdateSubmodules;
         event GitUIEventHandler PreVerifyDatabase;
         event GitUIEventHandler PreViewPatch;
+        event GitUIEventHandler PreEditGitReview;
+        event GitUIEventHandler PostEditGitReview;
+        event GitUIEventHandler PreGerritDownload;
+        event GitUIEventHandler PostGerritDownload;
+        event GitUIEventHandler PreGerritPublish;
+        event GitUIEventHandler PostGerritPublish;
 
         string GitCommand(string arguments);
         string CommandLineCommand(string cmd, string arguments);
@@ -116,6 +122,7 @@ namespace GitUIPluginInterfaces
         bool StartInitializeDialog();
         bool StartInitializeDialog(string dir);
         bool StartMailMapDialog();
+        bool StartGitReviewDialog();
         bool StartMergeBranchDialog(string branch);
         bool StartPluginSettingsDialog();
         bool StartPullDialog();
@@ -134,5 +141,7 @@ namespace GitUIPluginInterfaces
         bool StartUpdateSubmodulesDialog();
         bool StartVerifyDatabaseDialog();
         bool StartViewPatchDialog();
+        bool StartGerritDownloadDialog();
+        bool StartGerritPublishDialog();
     }
 }
