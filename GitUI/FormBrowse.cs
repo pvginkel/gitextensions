@@ -211,7 +211,7 @@ namespace GitUI
 
             try
             {
-                if (Settings.IconStyle.Equals("Cow", StringComparison.CurrentCultureIgnoreCase))
+                if (Settings.PlaySpecialStartupSound && Settings.IconStyle.Equals("Cow", StringComparison.CurrentCultureIgnoreCase))
                 {
                     new System.Media.SoundPlayer(Properties.Resources.cow_moo).Play();
                 }
@@ -1899,7 +1899,7 @@ namespace GitUI
                 var toolStripItem = (ToolStripItem)sender;
                 string args = force ? "-f": null;
 
-                var command = string.Join(" ", "checkout", args, string.Format("\"{0}\"", toolStripItem.Text));
+                var command = "checkout".Join(" ", args).Join(" ", string.Format("\"{0}\"", toolStripItem.Text));
                 var form = new FormProcess(command);
                 form.ShowDialog(this);
                 needRefresh = true;
